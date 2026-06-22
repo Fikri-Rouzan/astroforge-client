@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { Ship as ShipIcon } from "lucide-react";
 import { useWeb3 } from "../hooks/useWeb3.js";
 import { useLiveTelemetry } from "../hooks/useLiveTelemetry.js";
-import { ShipCard } from "./ShipCard.js";
+import { ShipCard } from "../wrappers/ShipCard.js";
 import { API_CONFIG } from "../config/api.config.js";
 import { toast } from "react-hot-toast";
 
@@ -34,42 +34,18 @@ export const HangarDashboard: React.FC = () => {
     return await res.json();
   };
 
-  const handleLaunch = async (shipId: number) => {
+  const executeHangarAction = async (
+    endpoint: string,
+    shipId: number,
+    loadingMessage: string,
+    successMessage: string,
+  ) => {
     if (!authToken) return;
     setActionLoadingId(shipId);
-    const loadToast = toast.loading("Initiating warp drive sequences...");
-    try {
-      const response = await fetch(API_CONFIG.endpoints.mining.launch, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${authToken}`,
-        },
-        body: JSON.stringify({ shipId }),
-      });
-      await handleServerResponse(response);
-      await refreshProfile();
-      toast.success(
-        "Spaceship launched into the asteroid belts successfully!",
-        { id: loadToast },
-      );
-    } catch (error) {
-      const msg =
-        error instanceof Error ? error.message : "Launch sequence error.";
-      toast.error(msg, { id: loadToast });
-    } finally {
-      setActionLoadingId(null);
-    }
-  };
+    const loadToast = toast.loading(loadingMessage);
 
-  const handleClaim = async (shipId: number) => {
-    if (!authToken) return;
-    setActionLoadingId(shipId);
-    const loadToast = toast.loading(
-      "Transferring mined raw ore to logistics bay...",
-    );
     try {
-      const response = await fetch(API_CONFIG.endpoints.mining.claim, {
+      const response = await fetch(endpoint, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -79,45 +55,13 @@ export const HangarDashboard: React.FC = () => {
       });
       await handleServerResponse(response);
       await refreshProfile();
-      toast.success("Mined resource cargo safely secured into storage tanks!", {
-        id: loadToast,
-      });
+      toast.success(successMessage, { id: loadToast });
     } catch (error) {
       const msg =
-        error instanceof Error ? error.message : "Refinery cargo claim error.";
+        error instanceof Error ? error.message : "Execution system breakdown.";
       toast.error(msg, { id: loadToast });
-    } finally {
-      setActionLoadingId(null);
     }
-  };
-
-  const handleUpgrade = async (shipId: number) => {
-    if (!authToken) return;
-    setActionLoadingId(shipId);
-    const loadToast = toast.loading(
-      "Overhauling spaceship engineering modules...",
-    );
-    try {
-      const response = await fetch(API_CONFIG.endpoints.spaceport.upgrade, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${authToken}`,
-        },
-        body: JSON.stringify({ shipId }),
-      });
-      await handleServerResponse(response);
-      await refreshProfile();
-      toast.success("Spaceship hardware modules successfully upgraded!", {
-        id: loadToast,
-      });
-    } catch (error) {
-      const msg =
-        error instanceof Error
-          ? error.message
-          : "Hardware upgrade routine failed.";
-      toast.error(msg, { id: loadToast });
-    } finally {
+    {
       setActionLoadingId(null);
     }
   };
@@ -139,9 +83,30 @@ export const HangarDashboard: React.FC = () => {
             livePendingAmount={livePendingOre[ship.id] || 0}
             ironOreBalance={playerProfile.ironOre}
             actionLoadingId={actionLoadingId}
-            onLaunch={handleLaunch}
-            onClaim={handleClaim}
-            onUpgrade={handleUpgrade}
+            onLaunch={(id) =>
+              executeHangarAction(
+                API_CONFIG.endpoints.mining.launch,
+                id,
+                "Initiating warp drive...",
+                "Spaceship launched successfully!",
+              )
+            }
+            onClaim={(id) =>
+              executeHangarAction(
+                API_CONFIG.endpoints.mining.claim,
+                id,
+                "Transferring cargo...",
+                "Resource cargo safely secured!",
+              )
+            }
+            onUpgrade={(id) =>
+              executeHangarAction(
+                API_CONFIG.endpoints.spaceport.upgrade,
+                id,
+                "Overhauling mechanics...",
+                "Hardware modules upgraded!",
+              )
+            }
           />
         ))}
       </div>
