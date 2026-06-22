@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Rocket, LogOut, Sun, Moon, Menu, X, Wallet } from "lucide-react";
-import { useWeb3 } from "../context/Web3Context.js";
+import { useWeb3 } from "../hooks/useWeb3";
 
 interface NavbarProps {
   darkMode: boolean;

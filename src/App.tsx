@@ -2,7 +2,8 @@ import { useState } from "react";
 import { Navbar } from "./components/Navbar.js";
 import { LoginScreen } from "./components/LoginScreen.js";
 import { HangarDashboard } from "./components/HangarDashboard.js";
-import { useWeb3 } from "./context/Web3Context.js";
+import { SpaceportPanel } from "./components/SpaceportPanel.js";
+import { useWeb3 } from "./hooks/useWeb3.js";
 import { Toaster } from "react-hot-toast";
 import { Coins, Flame, Gem } from "lucide-react";
 
@@ -92,6 +93,8 @@ export default function App() {
           </div>
 
           <HangarDashboard />
+
+          <SpaceportPanel />
         </main>
       )}
     </div>

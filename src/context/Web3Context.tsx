@@ -1,20 +1,9 @@
-import React, {
-  createContext,
-  useContext,
-  useState,
-  useEffect,
-  useCallback,
-} from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { ethers, type Eip1193Provider } from "ethers";
-import { API_CONFIG } from "../config/api.config.js";
-import type {
-  PlayerProfile,
-  AuthState,
-  Web3ContextType,
-} from "../types/type.js";
 import { toast } from "react-hot-toast";
-
-const Web3Context = createContext<Web3ContextType | undefined>(undefined);
+import { API_CONFIG } from "../config/api.config.js";
+import type { PlayerProfile, AuthState } from "../types/type.js";
+import { Web3Context } from "./Web3ContextCore.js";
 
 export const Web3Provider: React.FC<{ children: React.ReactNode }> = ({
   children,
@@ -169,10 +158,18 @@ export const Web3Provider: React.FC<{ children: React.ReactNode }> = ({
       toast.success("Command Link Secured. Welcome back, Commander!", {
         id: loadingToast,
       });
-    } catch (error) {
-      const errorMessage =
-        error instanceof Error ? error.message : "Unknown cryptographic error.";
-      console.error("[Web3Context Auth Error]:", errorMessage);
+    } catch (error: unknown) {
+      const err = error as { code?: string; message?: string };
+      const isUserReject =
+        err.code === "ACTION_REJECTED" || err.message?.includes("rejected");
+
+      const errorMessage = isUserReject
+        ? "Quantum signature request aborted by commander."
+        : error instanceof Error
+          ? error.message
+          : "Unknown cryptographic error.";
+
+      console.error("[Web3Context Auth Error]:", error);
       toast.error(errorMessage, { id: loadingToast });
     } finally {
       setIsLoading(false);
@@ -205,15 +202,4 @@ export const Web3Provider: React.FC<{ children: React.ReactNode }> = ({
       {children}
     </Web3Context.Provider>
   );
-};
-
-// eslint-disable-next-line react-refresh/only-export-components
-export const useWeb3 = () => {
-  const context = useContext(Web3Context);
-  if (context === undefined) {
-    throw new Error(
-      "useWeb3 must be utilized within a Web3Provider wrapper context.",
-    );
-  }
-  return context;
 };

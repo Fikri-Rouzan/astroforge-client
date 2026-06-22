@@ -1,0 +1,6 @@
+[
+  "function withdrawTokens(address player, uint256 amount, uint256 nonce, uint256 expiry, bytes signature) external",
+  "function playerNonces(address player) external view returns (uint256)",
+  "function balanceOf(address account) external view returns (uint256)",
+  "event TokensWithdrawn(address indexed player, uint256 amount, uint256 indexed nonce)"
+]

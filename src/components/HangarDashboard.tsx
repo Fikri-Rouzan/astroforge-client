@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Ship as ShipIcon, Pickaxe, Gauge } from "lucide-react";
-import { useWeb3 } from "../context/Web3Context.js";
+import { useWeb3 } from "../hooks/useWeb3.js";
 import { API_CONFIG } from "../config/api.config.js";
 import { toast } from "react-hot-toast";
 

@@ -2,6 +2,9 @@ const BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:3000/api";
 
 export const API_CONFIG = {
   baseUrl: BASE_URL,
+  contractAddress:
+    import.meta.env.VITE_CONTRACT_ADDRESS ||
+    "0x0000000000000000000000000000000000000000",
   endpoints: {
     auth: {
       challenge: `${BASE_URL}/auth/challenge`,
@@ -19,7 +22,8 @@ export const API_CONFIG = {
       upgrade: `${BASE_URL}/spaceport/upgrade`,
     },
     web3: {
-      withdrawal: `${BASE_URL}/web3/withdrawal`,
+      withdrawal: `${BASE_URL}/web3/withdraw`,
+      cancel: `${BASE_URL}/web3/cancel`,
     },
   },
 };

@@ -1,6 +1,6 @@
 import React from "react";
 import { ShieldAlert, Orbit } from "lucide-react";
-import { useWeb3 } from "../context/Web3Context.js";
+import { useWeb3 } from "../hooks/useWeb3";
 
 export const LoginScreen: React.FC = () => {
   const { connectWallet, isLoading } = useWeb3();
