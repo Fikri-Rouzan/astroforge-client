@@ -12,6 +12,7 @@ import type {
   AuthState,
   Web3ContextType,
 } from "../types/type.js";
+import { toast } from "react-hot-toast";
 
 const Web3Context = createContext<Web3ContextType | undefined>(undefined);
 
@@ -55,10 +56,21 @@ export const Web3Provider: React.FC<{ children: React.ReactNode }> = ({
 
         const result = await response.json();
         if (result.success) {
+          const backendData = result.data;
+
+          const formattedProfile: PlayerProfile = {
+            walletAddress: backendData.walletAddress,
+            ironOre: backendData.balances.ironOre,
+            platinum: backendData.balances.platinum,
+            fuel: backendData.balances.fuel,
+            nonce: backendData.nonce,
+            ships: backendData.hangar,
+          };
+
           setAuthState({
             walletAddress: wallet,
             authToken: token,
-            playerProfile: result.data as PlayerProfile,
+            playerProfile: formattedProfile,
           });
         } else {
           logoutCleanup();
@@ -102,11 +114,16 @@ export const Web3Provider: React.FC<{ children: React.ReactNode }> = ({
     const ethereum = (window as Window & { ethereum?: Eip1193Provider })
       .ethereum;
     if (!ethereum) {
-      alert("MetaMask or a compliant Web3 wallet extension was not detected.");
+      toast.error(
+        "Web3 extension node not found. Please install Web3 wallet extension.",
+      );
       return;
     }
 
     setIsLoading(true);
+    // Trigger a loading state toast to enhance user experience
+    const loadingToast = toast.loading("Synchronizing cosmic terminal link...");
+
     try {
       const provider = new ethers.BrowserProvider(ethereum);
       const signer = await provider.getSigner();
@@ -147,11 +164,16 @@ export const Web3Provider: React.FC<{ children: React.ReactNode }> = ({
       localStorage.setItem("astroforge_wallet", address);
 
       await fetchPlayerProfile(accessToken, address);
+
+      // Display success pop-up upon verified signature verification
+      toast.success("Command Link Secured. Welcome back, Commander!", {
+        id: loadingToast,
+      });
     } catch (error) {
       const errorMessage =
         error instanceof Error ? error.message : "Unknown cryptographic error.";
       console.error("[Web3Context Auth Error]:", errorMessage);
-      alert(errorMessage);
+      toast.error(errorMessage, { id: loadingToast });
     } finally {
       setIsLoading(false);
     }
@@ -159,6 +181,7 @@ export const Web3Provider: React.FC<{ children: React.ReactNode }> = ({
 
   const disconnectWallet = () => {
     logoutCleanup();
+    toast.success("Space station terminal session terminated.");
   };
 
   const refreshProfile = async () => {

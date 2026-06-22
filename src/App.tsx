@@ -1,7 +1,9 @@
 import { useState } from "react";
 import { Navbar } from "./components/Navbar.js";
 import { LoginScreen } from "./components/LoginScreen.js";
+import { HangarDashboard } from "./components/HangarDashboard.js";
 import { useWeb3 } from "./context/Web3Context.js";
+import { Toaster } from "react-hot-toast";
 import { Coins, Flame, Gem } from "lucide-react";
 
 export default function App() {
@@ -12,6 +14,17 @@ export default function App() {
     <div
       className={`${darkMode ? "dark bg-cosmic-void text-slate-100" : "bg-cosmic-light-bg text-cosmic-light-text"} min-h-screen transition-colors duration-300 font-body`}
     >
+      {/* Mounted Toaster */}
+      <Toaster
+        position="top-center"
+        toastOptions={{
+          className: darkMode
+            ? "!bg-cosmic-station !text-slate-100 !border !border-cosmic-panel !font-body !text-sm"
+            : "!font-body !text-sm",
+          duration: 4000,
+        }}
+      />
+
       <Navbar darkMode={darkMode} setDarkMode={setDarkMode} />
 
       {/* Main content area */}
@@ -78,10 +91,7 @@ export default function App() {
             </div>
           </div>
 
-          {/* Placeholder */}
-          <div className="p-12 rounded-3xl border border-dashed border-gray-300 dark:border-cosmic-panel text-center text-gray-400 dark:text-slate-500">
-            Hangar control panel deployment pending next module updates...
-          </div>
+          <HangarDashboard />
         </main>
       )}
     </div>
