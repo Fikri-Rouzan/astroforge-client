@@ -5,6 +5,7 @@ export interface Ship {
   miningRatePerSecond: number;
   maxCargo: number;
   status: string;
+  lastLaunchTime?: string;
 }
 
 export interface PlayerProfile {

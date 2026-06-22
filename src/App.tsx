@@ -1,21 +1,25 @@
 import { useState } from "react";
 import { Navbar } from "./components/Navbar.js";
 import { LoginScreen } from "./components/LoginScreen.js";
+import { ResourceGrid } from "./components/ResourceGrid.js";
 import { HangarDashboard } from "./components/HangarDashboard.js";
 import { SpaceportPanel } from "./components/SpaceportPanel.js";
+import { AsteroidField } from "./components/AsteroidField.js";
 import { useWeb3 } from "./hooks/useWeb3.js";
+import { useLiveTelemetry } from "./hooks/useLiveTelemetry.js";
 import { Toaster } from "react-hot-toast";
-import { Coins, Flame, Gem } from "lucide-react";
 
 export default function App() {
   const [darkMode, setDarkMode] = useState<boolean>(true);
   const { walletAddress, playerProfile } = useWeb3();
 
+  // live tracking calculation directly at the orchestration level
+  const { totalLiveIronOre } = useLiveTelemetry(playerProfile);
+
   return (
     <div
       className={`${darkMode ? "dark bg-cosmic-void text-slate-100" : "bg-cosmic-light-bg text-cosmic-light-text"} min-h-screen transition-colors duration-300 font-body`}
     >
-      {/* Mounted Toaster */}
       <Toaster
         position="top-center"
         toastOptions={{
@@ -28,12 +32,10 @@ export default function App() {
 
       <Navbar darkMode={darkMode} setDarkMode={setDarkMode} />
 
-      {/* Main content area */}
       {!walletAddress || !playerProfile ? (
         <LoginScreen />
       ) : (
         <main className="max-w-7xl mx-auto p-4 md:p-8 mt-4 animate-[fadeIn_0.5s_ease-out]">
-          {/* Welcome banner */}
           <div className="mb-8">
             <h2 className="text-xl md:text-2xl font-bold font-heading text-cosmic-secondary">
               COMMAND STATION PANEL
@@ -44,53 +46,12 @@ export default function App() {
             </p>
           </div>
 
-          {/* Telemetry resources view */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
-            {/* Resource iron ore */}
-            <div className="p-5 rounded-2xl border border-gray-200 dark:border-cosmic-panel bg-white dark:bg-cosmic-station shadow-sm flex items-center justify-between">
-              <div>
-                <span className="text-xs text-gray-400 dark:text-slate-500 font-heading tracking-wider block">
-                  IRON ORE
-                </span>
-                <span className="text-2xl font-bold font-heading text-slate-700 dark:text-white mt-1 block">
-                  {playerProfile.ironOre}
-                </span>
-              </div>
-              <div className="p-3 bg-indigo-500/10 rounded-xl border border-indigo-500/20 text-cosmic-primary">
-                <Coins className="w-6 h-6" />
-              </div>
-            </div>
+          <ResourceGrid
+            playerProfile={playerProfile}
+            totalLiveIronOre={totalLiveIronOre}
+          />
 
-            {/* Resource fuel */}
-            <div className="p-5 rounded-2xl border border-gray-200 dark:border-cosmic-panel bg-white dark:bg-cosmic-station shadow-sm flex items-center justify-between">
-              <div>
-                <span className="text-xs text-gray-400 dark:text-slate-500 font-heading tracking-wider block">
-                  FUEL SUPPLY
-                </span>
-                <span className="text-2xl font-bold font-heading text-slate-700 dark:text-white mt-1 block">
-                  {playerProfile.fuel}%
-                </span>
-              </div>
-              <div className="p-3 bg-cyan-500/10 rounded-xl border border-cyan-500/20 text-cosmic-secondary">
-                <Flame className="w-6 h-6" />
-              </div>
-            </div>
-
-            {/* Resource platinum */}
-            <div className="p-5 rounded-2xl border border-gray-200 dark:border-cosmic-panel bg-white dark:bg-cosmic-station shadow-sm flex items-center justify-between">
-              <div>
-                <span className="text-xs text-gray-400 dark:text-slate-500 font-heading tracking-wider block">
-                  PLATINUM REVENUE
-                </span>
-                <span className="text-2xl font-bold font-heading text-slate-700 dark:text-white mt-1 block">
-                  {playerProfile.platinum}
-                </span>
-              </div>
-              <div className="p-3 bg-amber-500/10 rounded-xl border border-amber-500/20 text-cosmic-accent">
-                <Gem className="w-6 h-6" />
-              </div>
-            </div>
-          </div>
+          <AsteroidField />
 
           <HangarDashboard />
 
