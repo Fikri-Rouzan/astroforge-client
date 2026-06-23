@@ -20,6 +20,13 @@ export const Web3Provider: React.FC<{ children: React.ReactNode }> = ({
 
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
+  // Lazy state initialization
+  const [isProfileLoading, setIsProfileLoading] = useState<boolean>(() => {
+    const storedToken = localStorage.getItem("astroforge_jwt");
+    const storedWallet = localStorage.getItem("astroforge_wallet");
+    return !!(storedToken && storedWallet);
+  });
+
   const logoutCleanup = useCallback(() => {
     localStorage.removeItem("astroforge_jwt");
     localStorage.removeItem("astroforge_wallet");
@@ -67,6 +74,8 @@ export const Web3Provider: React.FC<{ children: React.ReactNode }> = ({
       } catch (error) {
         console.error("[Web3Context] Failed to fetch player profile:", error);
         logoutCleanup();
+      } finally {
+        setIsProfileLoading(false);
       }
     },
     [logoutCleanup],
@@ -82,7 +91,6 @@ export const Web3Provider: React.FC<{ children: React.ReactNode }> = ({
       const token = authState.authToken;
       const wallet = authState.walletAddress;
 
-      // Deferring execution to the macro-task queue using setTimeout.
       const timer = setTimeout(() => {
         void fetchPlayerProfile(token, wallet);
       }, 0);
@@ -110,7 +118,6 @@ export const Web3Provider: React.FC<{ children: React.ReactNode }> = ({
     }
 
     setIsLoading(true);
-    // Trigger a loading state toast to enhance user experience
     const loadingToast = toast.loading("Synchronizing cosmic terminal link...");
 
     try {
@@ -131,7 +138,6 @@ export const Web3Provider: React.FC<{ children: React.ReactNode }> = ({
       if (!challengeResult.success) throw new Error(challengeResult.error);
 
       const { message, challengeToken } = challengeResult.data;
-
       const signature = await signer.signMessage(message);
 
       const loginResponse = await fetch(API_CONFIG.endpoints.auth.login, {
@@ -154,7 +160,6 @@ export const Web3Provider: React.FC<{ children: React.ReactNode }> = ({
 
       await fetchPlayerProfile(accessToken, address);
 
-      // Display success pop-up upon verified signature verification
       toast.success("Command Link Secured. Welcome back, Commander!", {
         id: loadingToast,
       });
@@ -194,6 +199,7 @@ export const Web3Provider: React.FC<{ children: React.ReactNode }> = ({
         authToken: authState.authToken,
         playerProfile: authState.playerProfile,
         isLoading,
+        isProfileLoading,
         connectWallet,
         disconnectWallet,
         refreshProfile,

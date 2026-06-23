@@ -4,6 +4,7 @@ import { Toaster } from "react-hot-toast";
 import { Navbar } from "./components/Navbar.js";
 import { LandingPage } from "./pages/LandingPage.js";
 import { DashboardPage } from "./pages/DashboardPage.js";
+import { ProtectedRoute } from "./components/ProtectedRoute.js";
 import { useWeb3 } from "./hooks/useWeb3.js";
 
 export default function App() {
@@ -51,7 +52,9 @@ export default function App() {
           <Route
             path="/dashboard"
             element={
-              isAuthenticated ? <DashboardPage /> : <Navigate to="/" replace />
+              <ProtectedRoute>
+                <DashboardPage />
+              </ProtectedRoute>
             }
           />
 

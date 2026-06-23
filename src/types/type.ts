@@ -28,6 +28,7 @@ export interface Web3ContextType {
   authToken: string | null;
   playerProfile: PlayerProfile | null;
   isLoading: boolean;
+  isProfileLoading: boolean;
   connectWallet: () => Promise<void>;
   disconnectWallet: () => void;
   refreshProfile: () => Promise<void>;
